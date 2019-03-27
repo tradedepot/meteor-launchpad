@@ -14,7 +14,13 @@
 # Master branch versioned deployment (only runs when a version number git tag exists - syntax: "v1.2.3")
 if [[ "$CIRCLE_BRANCH" == "master" ]]; then
   # check if we're on a version tagged commit
-  VERSION=$(git describe --tags | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+$")
+  # VERSION=$(git describe --tags | grep "^v[0-9]\+\.[0-9]\+\.[0-9]\+$")
+
+  if [ ! $CI ]; then
+  	VERSION="localbuild"
+  else
+  	VERSION="$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"
+  fi
 
   if [[ "$VERSION" ]]; then
     set -e
