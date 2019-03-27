@@ -21,14 +21,13 @@ if [ -f $APP_SOURCE_DIR/launchpad.conf ]; then
   fi
 fi
 
-apt-get install -y --no-install-recommends curl bzip2 bsdtar build-essential python git wget
+apt-get install -y --no-install-recommends curl bzip2 bsdtar build-essential python git wget gnupg
 
 
 # install gosu
 
 dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"
 
-apt-get install gnupg
 
 wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"
 wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"
