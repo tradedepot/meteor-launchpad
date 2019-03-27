@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:stretch
 MAINTAINER Uchenna Okafor <uokafor@tradedepot.co>
 
 RUN groupadd -r node && useradd -m -g node node
