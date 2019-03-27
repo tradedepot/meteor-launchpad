@@ -36,8 +36,14 @@ if [[ "$CIRCLE_BRANCH" == "master" ]]; then
 
     # push the builds
     docker push $IMAGE_NAME:$VERSION-devbuild
+
+    docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
     docker push $IMAGE_NAME:devbuild
+
+    docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
     docker push $IMAGE_NAME:$VERSION
+
+    docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
     docker push $IMAGE_NAME:latest
   else
     echo "On a deployment branch, but no version tag was found. Skipping image deployment."
