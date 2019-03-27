@@ -34,6 +34,9 @@ wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/downloa
 
 export GNUPGHOME="$(mktemp -d)"
 
+mkdir ~/.gnupg
+echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf
+
 gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
 gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu
 
