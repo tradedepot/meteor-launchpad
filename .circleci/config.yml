@@ -3,6 +3,8 @@ version: 2
 jobs:
   build:
     working_directory: /home/launchpad
+    parallelism: 1
+    shell: /bin/bash --login
 
     docker:
       - image: docker:latest
