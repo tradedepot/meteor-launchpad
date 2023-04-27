@@ -6,6 +6,10 @@ printf "\n[-] Installing base OS dependencies...\n\n"
 
 # install base dependencies
 
+sed -i s/deb.debian.org/archive.debian.org/g /etc/apt/sources.list
+sed -i 's|security.debian.org|archive.debian.org/|g' /etc/apt/sources.list
+sed -i '/stretch-updates/d' /etc/apt/sources.list
+
 apt-get update
 
 # ensure we can get an https apt source if redirected
