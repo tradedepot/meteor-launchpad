@@ -1,29 +1,43 @@
-FROM debian:stretch
-MAINTAINER Uchenna Okafor <uokafor@tradedepot.co>
+FROM debian:bullseye
+
+LABEL maintainer="Uchenna Okafor <uokafor@tradedepot.co>"
 
 RUN groupadd -r node && useradd -m -g node node
 
-# Gosu
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates \
+      openssl \
+      curl \
+      wget \
+      gnupg \
+      dirmngr \
+      xz-utils \
+      build-essential \
+      python3 \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+ENV npm_config_cafile=/etc/ssl/certs/ca-certificates.crt
+ENV PYTHON=/usr/bin/python3
+
 ENV GOSU_VERSION 1.10
 
-# MongoDB
 ENV MONGO_VERSION 3.4.10
 ENV MONGO_MAJOR 3.4
 ENV MONGO_PACKAGE mongodb-org
 
-# PhantomJS
 ENV PHANTOM_VERSION 2.1.1
 
-# build directories
 ENV APP_SOURCE_DIR /opt/meteor/src
 ENV APP_BUNDLE_DIR /opt/meteor/dist
 ENV BUILD_SCRIPTS_DIR /opt/build_scripts
 
-# Add entrypoint and build scripts
 COPY scripts $BUILD_SCRIPTS_DIR
 RUN chmod -R 750 $BUILD_SCRIPTS_DIR
 
-# Define all --build-arg options
 ONBUILD ARG APT_GET_INSTALL
 ONBUILD ENV APT_GET_INSTALL $APT_GET_INSTALL
 
@@ -42,21 +56,25 @@ ONBUILD ENV INSTALL_PHANTOMJS $INSTALL_PHANTOMJS
 ONBUILD ARG INSTALL_GRAPHICSMAGICK
 ONBUILD ENV INSTALL_GRAPHICSMAGICK $INSTALL_GRAPHICSMAGICK
 
-# Node flags for the Meteor build tool
 ONBUILD ARG TOOL_NODE_FLAGS
 ONBUILD ENV TOOL_NODE_FLAGS $TOOL_NODE_FLAGS
 
-# Node flags for the Meteor build tool
 ONBUILD ARG NODE_OPTIONS
 ONBUILD ENV NODE_OPTIONS $NODE_OPTIONS
 
-# optionally custom apt dependencies at app build time
-ONBUILD RUN if [ "$APT_GET_INSTALL" ]; then apt-get update && apt-get install -y $APT_GET_INSTALL; fi
+ONBUILD RUN apt-get update && \
+  apt-get install -y --no-install-recommends ca-certificates openssl curl && \
+  update-ca-certificates && \
+  rm -rf /var/lib/apt/lists/*
 
-# copy the app to the container
+ONBUILD RUN if [ "$APT_GET_INSTALL" ]; then \
+  apt-get update && \
+  apt-get install -y --no-install-recommends $APT_GET_INSTALL && \
+  rm -rf /var/lib/apt/lists/*; \
+fi
+
 ONBUILD COPY . $APP_SOURCE_DIR
 
-# install all dependencies, build app, clean up
 ONBUILD RUN cd $APP_SOURCE_DIR && \
   $BUILD_SCRIPTS_DIR/install-deps.sh && \
   $BUILD_SCRIPTS_DIR/install-node.sh && \
@@ -67,7 +85,6 @@ ONBUILD RUN cd $APP_SOURCE_DIR && \
   $BUILD_SCRIPTS_DIR/build-meteor.sh && \
   $BUILD_SCRIPTS_DIR/post-build-cleanup.sh
 
-# Default values for Meteor environment variables
 ENV ROOT_URL http://localhost
 ENV MONGO_URL mongodb://127.0.0.1:27017/meteor
 ENV PORT 3000
@@ -76,6 +93,5 @@ EXPOSE 3000
 
 WORKDIR $APP_BUNDLE_DIR/bundle
 
-# start the app
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "main.js"]
